@@ -44,7 +44,7 @@ exports.editAdmin = (req, res) => {
   }
 
   if (updateData.birthday) {
-    date.birthday = updateData.birthday;
+    data.birthday = updateData.birthday;
   }
 
   if (Object.keys(data).length > 0) {
@@ -52,12 +52,10 @@ exports.editAdmin = (req, res) => {
       id,
       {
         $set: data,
-      },
-      function (err, doc) {
-        if (err) return res.send({ message: err });
-        return res.send({ message: doc });
       }
-    );
+    ).then(doc => {
+      res.status(200).send({ message: doc });
+    }).catch(err => res.send({ message: err }));
   } else {
     return res.send({ message: "You did not update any Data." });
   }
@@ -98,13 +96,15 @@ exports.deleteAdmin = (req, res) => {
 };
 
 exports.getAllAdmins = async (req, res) => {
-  const sort = req.query.sort ?? "first_name";
-  const inc = req.query.inc ?? true;
+  console.log(req.query);
+  const sort = req.query.sort ?? "register_date";
+  let inc = req.query.inc ?? "asc";
   const searchString = req.query.search ?? "";
   const page = req.query.page ?? 1;
   const limit = req.query.limit ?? 10;
   const sorting = {};
-  sorting[sort] = inc ? "asc" : "desc";
+  sorting[sort] = inc === "desc" ? "desc" : "asc";
+  console.log(sorting);
 
   const roleId = await Role.findOne({name: 'admin'});
 
@@ -115,22 +115,20 @@ exports.getAllAdmins = async (req, res) => {
     $or: [
       {
         first_name: {
-          $regex: ".*" + searchString + ".*",
+          $regex: searchString,
+          $options: "i",
         },
       },
       {
         last_name: {
-          $regex: ".*" + searchString + ".*",
+          $regex: searchString,
+          $options: "i",
         },
       },
       {
         email: {
-          $regex: ".*" + searchString + ".*",
-        },
-      },
-      {
-        first_name: {
-          $regex: ".*" + searchString + ".*",
+          $regex: searchString,
+          $options: "i",
         },
       },
     ],
@@ -139,8 +137,8 @@ exports.getAllAdmins = async (req, res) => {
     .skip((page - 1) * limit)
     .limit(limit)
     .sort(sorting)
-    .then((user) => {
-      return res.status(200).send({ message: user });
+    .then((users) => {
+      return res.status(200).send({ message: users });
     })
     .catch((err) => {
       return res.status(503).send({ message: "Admin Not Found" });

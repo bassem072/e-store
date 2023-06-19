@@ -31,7 +31,7 @@ module.exports = function (app) {
     );
 
     app.put(
-      "/api/admin/:id/edit",
+      "/api/admin/:id",
       [
         authJwt.verifyToken,
         authJwt.checkRole(["super_admin", "admin"]),
@@ -50,8 +50,8 @@ module.exports = function (app) {
       controller.changePermission
     );
 
-    app.put(
-      "/api/admin/:id/delete",
+    app.delete(
+      "/api/admin/:id",
       [
         authJwt.verifyToken,
         authJwt.checkRole(["super_admin"]),
@@ -60,13 +60,13 @@ module.exports = function (app) {
       controller.deleteAdmin
     );
 
-    app.put(
+    app.get(
       "/api/admin",
       [authJwt.verifyToken, authJwt.checkRole(["super_admin"])],
       controller.getAllAdmins
     );
 
-    app.put(
+    app.get(
       "/api/admin/:id",
       [
         authJwt.verifyToken,
