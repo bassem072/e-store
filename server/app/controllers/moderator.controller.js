@@ -2,11 +2,11 @@ const db = require("../models");
 const { user: User, role: Role } = db;
 var bcrypt = require("bcrypt");
 
-exports.addAdmin = (req, res) => {
+exports.addModerator = (req, res) => {
   console.log("ok");
   const { first_name, last_name, email, password, gender, birthday } = req.body;
   Role.findOne({
-    name: "admin",
+    name: "moderator",
   })
     .then(async (role) => {
       const user = new User({
@@ -27,7 +27,7 @@ exports.addAdmin = (req, res) => {
     });
 };
 
-exports.editAdmin = (req, res) => {
+exports.editModerator = (req, res) => {
   const id = req.params.id;
   const updateData = req.body;
   const data = {};
@@ -48,14 +48,13 @@ exports.editAdmin = (req, res) => {
   }
 
   if (Object.keys(data).length > 0) {
-    User.findByIdAndUpdate(
-      id,
-      {
-        $set: data,
-      }
-    ).then(doc => {
-      res.status(200).send({ message: doc });
-    }).catch(err => res.send({ message: err }));
+    User.findByIdAndUpdate(id, {
+      $set: data,
+    })
+      .then((doc) => {
+        res.status(200).send({ message: doc });
+      })
+      .catch((err) => res.send({ message: err }));
   } else {
     return res.send({ message: "You did not update any Data." });
   }
@@ -84,18 +83,18 @@ exports.changePermission = (req, res) => {
     });
 };
 
-exports.deleteAdmin = (req, res) => {
+exports.deleteModerator = (req, res) => {
   const current_id = req.params.id;
   User.findByIdAndDelete(current_id)
     .then((user) => {
       return res.status(200).send({ message: user });
     })
     .catch((err) => {
-      return res.status(500).send({ message: "Admin not updated" });
+      return res.status(500).send({ message: "Moderator not updated" });
     });
 };
 
-exports.getAllAdmins = async (req, res) => {
+exports.getAllModerators = async (req, res) => {
   console.log(req.query);
   const sort = req.query.sort ?? "register_date";
   let inc = req.query.inc ?? "asc";
@@ -106,11 +105,11 @@ exports.getAllAdmins = async (req, res) => {
   sorting[sort] = inc === "desc" ? "desc" : "asc";
   console.log(sorting);
 
-  const role = await Role.findOne({name: 'admin'});
+  const roleId = await Role.findOne({ name: "moderator" });
 
   User.find({
     roles: {
-      $in: [role._id],
+      $in: [roleId],
     },
     $or: [
       {
@@ -141,11 +140,11 @@ exports.getAllAdmins = async (req, res) => {
       return res.status(200).send({ message: users });
     })
     .catch((err) => {
-      return res.status(503).send({ message: "Admin Not Found" });
+      return res.status(503).send({ message: "Moderators Not Found" });
     });
 };
 
-exports.getAdmin = (req, res) => {
+exports.getModerator = (req, res) => {
   const current_id = req.params.id;
   User.findById(current_id)
     .populate("roles", "-__v")
@@ -153,14 +152,14 @@ exports.getAdmin = (req, res) => {
       return res.status(200).send({ message: user });
     })
     .catch((err) => {
-      return res.status(503).send({ message: "Admin Not Found" });
+      return res.status(503).send({ message: "Moderator Not Found" });
     });
 };
 
 exports.getLength = (req, res) => {
   console.log("hi");
   Role.findOne({
-    name: "admin",
+    name: "moderator",
   })
     .then((role) => {
       User.countDocuments({

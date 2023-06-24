@@ -24,6 +24,9 @@ app.get("/", (req, res) => {
 require("./app/routes/auth.routes")(app);
 require("./app/routes/user.routes")(app);
 require("./app/routes/admin.routes")(app);
+require("./app/routes/moderator.routes")(app);
+require("./app/routes/category.routes")(app);
+require("./app/routes/sub_category.routes")(app);
 
 db.mongoose
   .connect(`mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`, {
